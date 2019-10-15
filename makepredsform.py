@@ -1,6 +1,6 @@
 import json
 with open('kp80k_blingkpe.tsv','r') as f:
-    with open('candidate.json','w') as w:
+    with open('kp80k_blingkpe.json','w') as w:
         for l in f:
             l = l.strip().split('\t')
             data = {}
@@ -12,7 +12,7 @@ with open('kp80k_blingkpe.tsv','r') as f:
             w.write("{}\n".format(json.dumps(data)))
 
 with open('kp80k_blingkpe_finetune.tsv','r') as f:
-    with open('candidate_finetune.json','w') as w:
+    with open('kp80k_blingkpe_finetune.json','w') as w:
         for l in f:
             l = l.strip().split('\t')
             data = {}
