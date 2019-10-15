@@ -1,8 +1,5 @@
 candidate.json
 documents.tsv 
-OpenKPFull.jsonl 
-OpenKPTrain.jsonl
-OpenKPDev.jsonl 
-OpenKPEval.jsonl
-OpenKDDocs.tsv
+OpenKP*
+kp80*
 preds
