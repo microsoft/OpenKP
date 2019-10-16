@@ -20,7 +20,8 @@ To generate the corpus we sample ~100,000 urls from the Bing Index to get a repr
     'KeyPhrases': '[["Doctor", "Appointment"], ["Web", "Application"], []]'
 }
 ```
-### Cleanbody Text
+### Text
+The text in this corpus is a represenation of what Bing considers to be the cleanbody text of a document. Think of this like a reader view for a webpage where all ads, menus, footers and other general webpage content is removed and just the core content is left. 
 
 ### VDOM 
 VDOM is a textual virtual representation of the DOM of a website at the time of the snapshot. In order to do this the VDOM provides a rich markup to the textual data in the cleanbody text. Each item will contain its id, the text referenced, start_idx, end_idx and a array of 20 features that represent the text. The first 10 represent the nodes values while 11-20 represent the same values for the text node's parent. 
@@ -67,14 +68,15 @@ Where each line is a json object with a url as key and an array of keyphrases(ma
 ```python
 python evaluate.py <candidate file> <reference file>
 ``` 
- To test please use (the evaluation script)[https://github.com/microsoft/OpenKP/blob/master/evaluate.py] on the Dev set. If your pipeline is running correctly you score will be similair to that shown below.
+ To test please use [the evaluation script](https://github.com/microsoft/OpenKP/blob/master/evaluate.py) on the Dev set. If your pipeline is running correctly you score will be similair to that shown below.
 ```bash 
-python evaluate.py eval_data/candidate.json eval_data/reference.json
+(base) spacemanidol@spacemanidol:/mnt/c/Users/dacamp/Documents/MSMARCO-OpenKP$ python evaluate.py eval_data/candidate.json eval_data/reference.json
 ########################
 Metrics
 Exact Match Score:0.6666666666666666
-F1 Score:0.8045977011494253
+F1 Score:0.9090909090909091
 ##################
+None
 ```
 
 ## Download the Dataset
