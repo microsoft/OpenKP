@@ -90,6 +90,21 @@ None
 
 ## Download the Dataset
 To Download the OpenKP Dataset please navigate to [msmarco.org](http://www.msmarco.org/dataset.aspx) and agree to our Terms and Conditions. If there is some data you think we are missing and would be useful please open an issue in this repo.
+
+## FAQ
+### What is the input for keyphrase extraction? 
+The keyphrases are all derived from the textual data but the visual markup(aka VDOM) can be used to produce a more accurate model.
+### Is the released dataset is processed.
+Yes. The rawtext has been processed. The only tokenization should be on the "SPACE" character.
+### Is there punctuation in the document text?
+No. All punctuation was removed as part of the cleanbody text processing. 
+### Are all keyphrases short?
+No! While many keyphrases can be very short(average length is 2) there are documents where the most salient keyphrases are quite long.
+### Is the TITLE attribute of the document considered in the processed text?
+No. It is not.
+### In evaluation do you perform stemming to compute the exact match?
+No. In order to focus this task on keyphrase prediction and thus matches are evaluated on full phrases. Please see the eval script for further questions.
+
 # MSMARCO Dataset Family
 A Family of datasets built using technology and Data from Microsoft's Bing.
 
