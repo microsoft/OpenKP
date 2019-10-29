@@ -20,10 +20,11 @@ To generate the corpus we sample ~100,000 urls from the Bing Index to get a repr
     'KeyPhrases': '[["Doctor", "Appointment"], ["Web", "Application"], []]'
 }
 ```
-### Cleanbody Text
+### Text
+The text in this corpus is a represenation of what Bing considers to be the cleanbody text of a document. Think of this like a reader view for a webpage where all ads, menus, footers and other general webpage content is removed and just the core content is left. 
 
 ### VDOM 
-VDOM is a textual virtual representation of the DOM of a website at the time of the snapshot. In order to do this the VDOM provides a rich markup to the textual data in the cleanbody text. Each item will contain its id, the text referenced, start_idx, end_idx and a array of 20 features that represent the text. The first 10 represent the nodes values while 11-20 represent the same values for the text node's parent. 
+VDOM is a textual virtual representation of the web documents deruved frin the DOM of a website at the time of the snapshot. In order to do this the VDOM provides a rich markup to the textual data in the cleanbody text. Each item will contain its id, the text referenced, start_idx, end_idx and a array of 20 features that represent the text. The first 10 represent the nodes values while 11-20 represent the same values for the text node's parent. 
 {
     "Id":0,
     "text":"Average Monthly Salary for 72 Countries in the World",
@@ -33,17 +34,16 @@ VDOM is a textual virtual representation of the DOM of a website at the time of 
     "end_idx":9
 }
 The what the feature array values represent can be found below. For Booleans (false -> 0.0, true -> 1.0).
-
-1.	Node X pixel position
-2.	Node width pixel
-3.	Node Y pixel position
-4.	Node height (x,y are upper left corner)
-5.	Is the node a HTML block element?
-6.	Is the node an HTML Inline element?
-7.	Does the node having a <h> heading tag?
-8.	Is the node a leaf element?
-9.	Text Font size
-10.	Is the text bolded?
+1.	Node X pixel position:Upper Left X Coord 
+2.	Node width pixel:Width of Node 
+3.	Node Y pixel position:Upper Left Y Coord 
+4.	Node height (x,y are upper left corner): Height of Node 
+5.	Is the node a HTML block element(Boolean):Refer https://developer.mozilla.org/en-US/docs/Web/HTML/Block-level_elements. A node is Block Element if it's an Element Node and its tag is one of the following: { "address", "article", "aside", "blockquote", "canvas", "dd", "div", "dl", "dt", "fieldset", "figcaption", "caption", "figure", "footer", "form", "h1", "h2", "h3", "h4", "h5", "h6", "header", "hgroup", "hr", "li", "main", "nav", "noscript", "ol", "output", "p", "pre", "section", "table", "tr", "td", "th", "tbody", "thead", "tfoot", "ul", "video" } 
+6.	Is the node an HTML Inline element(Boolean):Refer see https://developer.mozilla.org/en-US/docs/Web/HTML/Inline_elements. A node is Inline Block Element if it's an Element Node and its tag is one of the following: { "select", "button" } 
+7.	Does the node having a <h> heading tag(Boolean): We check recursively started from the node and going up its parent whether each node is a Heading Element. We stop when the parent becomes null indicating we have reached the topmost ancestor or when we encounter a heading element. 
+8.	Is the node a leaf element(Boolean):It’s a Block Element and does not contain any Block Element Nodes i.e. none of its Children are Block Element Nodes 
+9.	Text Font size:  For Text Nodes it’s the font size of the text it contains. Only text node have font size so we take the first text node font size property as the font size of the entire block node. 
+10.	Is the text bolded(Boolean): We check recursively started from the first non empty text node and going up its parent whether each node tag is either "b" or "strong". We stop when the parent becomes null indicating we have reached the topmost ancestor or if we find a bolded tag in one of the nodes. 
 11. Node's Parent X pixel position
 12. Node's Parent width pixel
 13. Node's Parent Y pixel positions
@@ -53,9 +53,19 @@ The what the feature array values represent can be found below. For Booleans (fa
 17. Does the node's parent have a <h> heading tag?
 18. Is the node's parent a leaf element?
 19. Node's Parent text font size
-20 Is the node's parent text bolded?
+20. Is the node's parent text bolded?
 
-
+#### Definitions
+1. Text Node:Innermost Nodes. Smallest Unit in Node Hierarchy.  
+2. Element Node: Comprises of Most Standard HTML Tags eg p,span etc 
+3. Parent Node: The parent node of a node is one level higher and has the node as its child.
+4. Heading Element: A Heading Element is defined as a node which is an Element Node and its tag is one of the following:{h1,h2,h3,h4,h5,h6} 
+5. Non Empty Text Node:We ignore nodes if they satisfy one of the following conditions: 
+    a. TagValue i.e. the text of the node is empty or whitespace 
+    b. If Node is Invisible 
+    c. If parent is an Element Node and its tag is one of the following : { "script", "noscript", "style", "xmp", "embed", "noembed", "object" } i.e. we ignore service tags 
+6. First Non Empty Text Node:Each Block Node consist of a sequence of text Nodes. We iterate over the sequence and return the first text node which is Non Empty.  
+7. Visible Node:Nodes with Height and Width greater than 2px are considered visible We also include title nodes under head tag as visible. 
 ## Evaluation
 To evaluate KeyPhrase Extraction systems we ask researchers to submit their systems prediction in the following format:  
 
@@ -67,18 +77,34 @@ Where each line is a json object with a url as key and an array of keyphrases(ma
 ```python
 python evaluate.py <candidate file> <reference file>
 ``` 
- To test please use (the evaluation script)[https://github.com/microsoft/OpenKP/blob/master/evaluate.py] on the Dev set. If your pipeline is running correctly you score will be similair to that shown below.
+ To test please use [the evaluation script](https://github.com/microsoft/OpenKP/blob/master/evaluate.py) on the Dev set. If your pipeline is running correctly you score will be similair to that shown below.
 ```bash 
-python evaluate.py eval_data/candidate.json eval_data/reference.json
+(base) spacemanidol@spacemanidol:/mnt/c/Users/dacamp/Documents/MSMARCO-OpenKP$ python evaluate.py eval_data/candidate.json eval_data/reference.json
 ########################
 Metrics
 Exact Match Score:0.6666666666666666
-F1 Score:0.8045977011494253
+F1 Score:0.9090909090909091
 ##################
+None
 ```
 
 ## Download the Dataset
 To Download the OpenKP Dataset please navigate to [msmarco.org](http://www.msmarco.org/dataset.aspx) and agree to our Terms and Conditions. If there is some data you think we are missing and would be useful please open an issue in this repo.
+
+## FAQ
+### What is the input for keyphrase extraction? 
+The keyphrases are all derived from the textual data but the visual markup(aka VDOM) can be used to produce a more accurate model.
+### Is the released dataset is processed.
+Yes. The rawtext has been processed. The only tokenization should be on the "SPACE" character.
+### Is there punctuation in the document text?
+No. All punctuation was removed as part of the cleanbody text processing. 
+### Are all keyphrases short?
+No! While many keyphrases can be very short(average length is 2) there are documents where the most salient keyphrases are quite long.
+### Is the TITLE attribute of the document considered in the processed text?
+No. It is not.
+### In evaluation do you perform stemming to compute the exact match?
+No. In order to focus this task on keyphrase prediction and thus matches are evaluated on full phrases. Please see the eval script for further questions.
+
 # MSMARCO Dataset Family
 A Family of datasets built using technology and Data from Microsoft's Bing.
 
