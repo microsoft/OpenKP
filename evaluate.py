@@ -14,7 +14,7 @@ def normalize_answer(s):
         return ''.join(ch for ch in text if ch not in exclude)
     def lower(text):
         return text.lower()
-    return ' '.join([white_space_fix(remove_articles(remove_punc(lower(x)))) for x in s])
+    return ' '.join([lower(x) for x in s]).rstrip()
 
 def remove_empty(a_list):
     new_list = []
@@ -24,34 +24,51 @@ def remove_empty(a_list):
                 new_list.append(normalize_answer(i))   
     return new_list
 
-def get_score(candidates, references):
-    fp, tp, fn = 0,0,0
-    candidate_set = set(candidates)
-    reference_set = set(references)
-    for i in references:
-        if i in candidate_set:
-            tp += 1
-        else:
-            fn += 1
-    for i in candidates:
-        if i not in reference_set:
-            fp += 1
-    p = tp /(tp+fp)
-    r = tp /(tp+fn)
-    return p, r
+def dedup(kp_list):
+    dedupset = set()
+    kp_list_dedup = []
+    for kp in kp_list:
+        if kp in dedupset:
+            continue       
+        kp_list_dedup.append(kp)
+        dedupset.add(kp)
+    return kp_list_dedup
+
+def get_score_full(candidates, references, maxDepth = 5):
+    precision = []
+    recall = []
+    reference_set = set(dedup(references))
+    candidates = dedup(candidates)
+    referencelen = len(reference_set)
+    true_positive = 0
+    for i in range(maxDepth):
+        if len(candidates) > i:
+            kp_pred = candidates[i]     
+            if kp_pred in reference_set:
+                true_positive += 1
+        precision.append(true_positive/float(i + 1))
+        recall.append(true_positive/float(referencelen))
+    return precision, recall
         
 def evaluate(candidates, references, urls):
-    precision_scores, recall_scores = {1:[], 3:[], 5:[]}, {1:[], 3:[], 5:[]}
+    precision_scores, recall_scores, f1_scores = {1:[], 3:[], 5:[]}, {1:[], 3:[], 5:[]}, {1:[], 3:[], 5:[]}
     for url in urls:
         candidate = remove_empty(candidates[url]['KeyPhrases'])
         reference = remove_empty(references[url]['KeyPhrases'])
+        p, r = get_score_full(candidate, reference) 
         for i in [1,3,5]:
-            p, r = get_score(candidate, reference[:i]) 
-            precision_scores[i].append(p)
-            recall_scores[i].append(r)
+            precision = p[i-1]
+            recall = r[i-1]
+            if precision + recall > 0:
+                f1_scores[i].append((2 * (precision * recall)) / (precision + recall))
+            else:
+                f1_scores[i].append(0)
+            precision_scores[i].append(precision)
+            recall_scores[i].append(recall)
     print("########################\nMetrics")
     for i in precision_scores:
         print("@{}".format(i))
+        print("F1:{}".format(np.mean(f1_scores[i])))
         print("P:{}".format(np.mean(precision_scores[i])))
         print("R:{}".format(np.mean(recall_scores[i])))
     print("#########################")
@@ -59,7 +76,6 @@ def evaluate(candidates, references, urls):
 def files_are_good(candidate, reference):
     referenceURLs = set(reference.keys())
     candidateURLs = set(candidate.keys())
-    return True
     if len((referenceURLs - candidateURLs)) > 0:
         print("ERROR:Candidate File is missing URLS present in reference file\nMissing urls:{}".format(referenceURLs-candidateURLs))
         return False 
