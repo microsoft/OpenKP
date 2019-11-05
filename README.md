@@ -82,10 +82,19 @@ python evaluate.py <candidate file> <reference file>
 (base) spacemanidol@spacemanidol:/mnt/c/Users/dacamp/Documents/MSMARCO-OpenKP$ python evaluate.py eval_data/candidate.json eval_data/reference.json
 ########################
 Metrics
-Exact Match Score:0.6666666666666666
-F1 Score:0.9090909090909091
-##################
-None
+@1
+F1:0.0
+P:0.0
+R:0.0
+@3
+F1:0.6666666666666666
+P:0.6666666666666666
+R:0.6666666666666666
+@5
+F1:0.5
+P:0.4
+R:0.6666666666666666
+#########################
 ```
 
 ## Download the Dataset
