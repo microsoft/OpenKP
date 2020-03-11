@@ -98,7 +98,7 @@ R:0.6666666666666666
 ```
 
 ## Download the Dataset
-To Download the OpenKP Dataset please navigate to [msmarco.org](http://www.msmarco.org/dataset.aspx) and agree to our Terms and Conditions. If there is some data you think we are missing and would be useful please open an issue in this repo.
+To Download the OpenKP Dataset please navigate to [msmarco.org](https://microsoft.github.io/msmarco/) and agree to our Terms and Conditions. If there is some data you think we are missing and would be useful please open an issue in this repo.
 
 ## FAQ
 ### What is the input for keyphrase extraction? 
